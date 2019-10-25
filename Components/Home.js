@@ -1,25 +1,95 @@
 import React from 'react';
-import { StyleSheet, View, Button, TextInput, FlatList, Text, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Text, TouchableOpacity } from 'react-native';
+import DefaultStyle from './Style'
+
+import moment from 'moment';
+import localization from 'moment/locale/fr';
+
 
 class Home extends React.Component {
 
     constructor(props) {
         super(props)
+
+        moment.updateLocale('fr', localization)
+        this.state = {
+            date: moment().startOf('month'),
+            selectedDate: moment()
+        }
+    }
+
+
+    getFirstMonday(date) {
+        var firstDay = moment(date).startOf('month');
+        return moment(firstDay).startOf('week');
+    }
+
+    getWeeksNums(date) {
+        var lastDate = moment(date).startOf('month'),
+            weeks = 0;
+        while (lastDate.format('M') == date.format('M')) {
+            weeks++;
+            lastDate.endOf('week').add(1, 'days')
+        }
+
+        return weeks;
+    }
+
+    withinMonth(date, startDate) {
+        return date.format('YYYY-MM') === startDate.format('YYYY-MM');
+    }
+
+    sameDate(date1, date2) {
+        return date1.format('YYYY-MM-DD') == date2.format('YYYY-MM-DD')
+    }
+
+
+
+
+    _changeMonth(dir) {
+        var newDate = this.state.date.clone();
+        newDate.add(dir, 'month')
+        this.setState({
+            date: newDate,
+            selectedDate: newDate
+        });
+    }
+
+    _changeSelectedDay(date) {
+        this.setState({
+            selectedDate: date
+        });
+        // console.log(date);
+
     }
 
     _displayDates() {
 
-        var weeks = [];
+        let firstMonday = this.getFirstMonday(this.state.date),
+            date = firstMonday,
+            weeks = [];
 
-        for (let day = 0; day < 7; day++) {
+        for (let week = 0; week < this.getWeeksNums(this.state.date); week++) {
             var dates = [];
-            for (let week = 0; week < 5; week++) {
+            for (let day = 0; day < 7; day++) {
                 dates.push(
-                    <Text style={[styles.default_text, styles.days_text]}>{day + 1 + week * 7}</Text>
+                    <TouchableOpacity onPress={this._changeSelectedDay.bind(this, date)}>
+                        <Text style={[
+                            DefaultStyle.default_text,
+                            styles.days_text,
+                            this.withinMonth(date, this.state.date) ? {} : styles.othermonth_days_text,
+                            this.sameDate(date, this.state.selectedDate) ? styles.current_days_text : {}
+                        ]}>{date.format('DD')}</Text>
+                        <View style={styles.event_days_list}>
+                            {/* <View style={styles.event_days_box}></View> */}
+                        </View>
+                    </TouchableOpacity>
                 )
+                date = moment(date).add(1, 'day')
             }
+
             weeks.push(
-                <View style={[styles.default_container, styles.weeks_container]}>{dates}</View>
+                <View style={[DefaultStyle.default_container, styles.weeks_container]}>{dates}</View>
             )
 
         }
@@ -30,32 +100,50 @@ class Home extends React.Component {
     render() {
         return (
             <View style={styles.main_container}>
-                <View style={[styles.default_container, styles.date_container]}>
-                    <Text style={[styles.default_text, styles.date_text]}>30</Text>
-                    <Text style={[styles.default_text, styles.day_text]}>Mardi</Text>
+                <View style={[DefaultStyle.default_container, styles.date_container]}>
+                    <Text style={[DefaultStyle.default_text, styles.date_text]}>{this.state.selectedDate.format('DD')}</Text>
+                    <Text style={[DefaultStyle.default_text, styles.day_text]}>{this.state.selectedDate.format('dddd')}</Text>
                 </View>
 
-                <View style={[styles.default_container, styles.month_container]}>
-                    <Text style={[styles.default_text, styles.month_text]}>Octobre 2019</Text>
+                <View style={[DefaultStyle.default_container, styles.month_container]}>
+                    <TouchableOpacity onPress={() => this._changeMonth(-1)}>
+                        <Image source={require('../images/ic_chevron_left.png')} style={{ height: 18, width: 18, marginLeft: 5 }} />
+                    </TouchableOpacity>
+                    <Text style={[DefaultStyle.default_text, styles.month_text]}>{this.state.date.format('MMMM YYYY')}</Text>
+                    <TouchableOpacity onPress={() => this._changeMonth(1)}>
+                        <Image source={require('../images/ic_chevron_right.png')} style={{ height: 18, width: 18, marginRight: 5 }} />
+                    </TouchableOpacity>
                 </View>
 
-                <View style={[styles.default_container, styles.daysname_container]}>
-                    <Text style={[styles.default_text, styles.daysname_text]}>Lun</Text>
-                    <Text style={[styles.default_text, styles.daysname_text]}>Mar</Text>
-                    <Text style={[styles.default_text, styles.daysname_text]}>Mer</Text>
-                    <Text style={[styles.default_text, styles.daysname_text]}>Jeu</Text>
-                    <Text style={[styles.default_text, styles.daysname_text]}>Ven</Text>
-                    <Text style={[styles.default_text, styles.daysname_text]}>Sam</Text>
-                    <Text style={[styles.default_text, styles.daysname_text]}>Dim</Text>
+                <View style={[DefaultStyle.default_container, styles.daysname_container]}>
+                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Lun</Text>
+                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Mar</Text>
+                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Mer</Text>
+                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Jeu</Text>
+                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Ven</Text>
+                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Sam</Text>
+                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Dim</Text>
                 </View>
 
-                <View style={[styles.default_container, styles.days_container]}>
+                <View style={[DefaultStyle.default_container, styles.days_container]}>
                     {this._displayDates()}
                 </View>
 
-                <View style={[styles.default_container, styles.events_container]}>
-                    <Text style={[styles.default_text, styles.events_title_text]}>Événements</Text>                    
+                <View style={[DefaultStyle.default_container, styles.events_container]}>
+                    <Text style={[DefaultStyle.default_text, styles.events_title_text]}>Événements</Text>
+                    <ScrollView>
+                        <View style={styles.events_list}>
+                            <View style={styles.event_box}>
+                                <Text>Aurélie</Text>
+                            </View>
+                        </View>
+                    </ScrollView>
                 </View>
+
+
+                <TouchableOpacity style={[DefaultStyle.floating_button]} activeOpacity={.7}>
+                    <Image style={DefaultStyle.floating_button_icon} source={require('../images/ic_plus.png')} />
+                </TouchableOpacity>
             </View>
         );
     }
@@ -66,29 +154,6 @@ const styles = StyleSheet.create({
     main_container: {
         flex: 1,
         flexDirection: 'column',
-    },
-    default_text: {
-        color: '#F6F6F6',
-        fontFamily: 'Ubuntu-Bold',
-        fontSize: 80,
-        textTransform: "uppercase",
-
-        textShadowOffset: {
-            width: 0,
-            height: 2
-        },
-        textShadowColor: 'rgba(0, 0, 0, 0.25)',
-        textShadowRadius: 2,
-    },
-    default_container: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowOffset: {
-            width: 0,
-            height: 4
-        },
-        shadowColor: '#000',
-        shadowRadius: 4,
     },
 
 
@@ -115,6 +180,8 @@ const styles = StyleSheet.create({
     month_container: {
         backgroundColor: '#454545',
         elevation: 2,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     },
     month_text: {
         fontSize: 10,
@@ -140,36 +207,81 @@ const styles = StyleSheet.create({
 
     days_container: {
         flex: 2,
-        flexDirection: "row",
+        flexDirection: "column",
         alignContent: "center",
         justifyContent: "space-around",
         alignItems: "stretch"
     },
     weeks_container: {
         flex: 3,
-        flexDirection: "column",
+        flexDirection: "row",
         justifyContent: "space-around",
     },
     days_text: {
         color: '#2A2A2A',
         fontSize: 15,
         letterSpacing: 5,
-        textShadowRadius: 0
+        textShadowRadius: 0,
+        textAlign: 'center'
+    },
+    othermonth_days_text: {
+        color: '#B0B0B0',
+    },
+    current_days_text: {
+        // color: '#009BAF',
+        color: 'red',
+    },
+    event_days_list: {
+        position: 'absolute',
+        left: 0, right: 0, bottom: -5,
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'row'
+    },
+    event_days_box: {
+        height: 4,
+        width: 4,
+        backgroundColor: 'red',
+        marginHorizontal: 1
     },
 
 
     events_container: {
         flex: 1,
-        backgroundColor: '#E1E1E1',        
+        backgroundColor: '#E1E1E1',
         justifyContent: "flex-start",
-        alignItems: "flex-start"
+        alignItems: "stretch",
+        padding: 10,
+        paddingBottom: 0
     },
     events_title_text: {
         fontSize: 14,
         color: '#B0B0B0',
         textShadowRadius: 0,
         letterSpacing: 6,
-        padding: 10,
+        marginBottom: 10
+    },
+    events_list: {
+        justifyContent: "center",
+        alignItems: "stretch",
+        alignContent: 'stretch',
+    },
+    event_box: {
+        backgroundColor: 'white',
+        padding: 6,
+        borderLeftWidth: 8,
+        borderLeftColor: 'red',
+        borderTopLeftRadius: 8,
+        borderBottomLeftRadius: 8,
+        marginBottom: 6,
+
+        shadowColor: 'rgba(0, 0, 0, 0.15)',
+        shadowOffset: {
+            width: 2,
+            height: 2
+        },
+        shadowRadius: 1,
+        elevation: 1,
     },
 })
 
