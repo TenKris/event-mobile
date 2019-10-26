@@ -1,9 +1,13 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Text, TouchableOpacity } from 'react-native';
-import DefaultStyle from './Style'
+
+import DefaultStyle from './Style/Style'
+import Event from './Event'
+import AsyncStorage from '@react-native-community/async-storage';
 
 import moment from 'moment';
 import localization from 'moment/locale/fr';
+import Palette from './Style/Palette';
 
 
 class Home extends React.Component {
@@ -15,6 +19,25 @@ class Home extends React.Component {
         this.state = {
             date: moment().startOf('month'),
             selectedDate: moment()
+        }
+
+        // Store data
+        let format = 'YYYY-MM-DD hh:mm:ss'
+        let event = {
+            name: "Travail chez le saint",
+            description: null,
+            start: moment('2019-10-28 08:30:00', format).format(),
+            end: moment('2019-10-28 18:00:00', format).format(),
+        }
+        let events = []
+        events.push(event)
+
+        storeData = async () => {
+            try {
+                await AsyncStorage.setItem('2019-10-28', JSON.stringify(events))
+            } catch (e) {
+                // saving error
+            }
         }
     }
 
@@ -46,20 +69,26 @@ class Home extends React.Component {
 
 
 
-    _changeMonth(dir) {
+    _changeMonth(dir, date) {
         var newDate = this.state.date.clone();
         newDate.add(dir, 'month')
         this.setState({
             date: newDate,
-            selectedDate: newDate
+            selectedDate: date != null ? date : newDate
         });
     }
 
     _changeSelectedDay(date) {
-        this.setState({
-            selectedDate: date
-        });
-        // console.log(date);
+        var dateMonth = parseInt(date.format("MM")),
+            selectedDateMonth = parseInt(this.state.selectedDate.format("MM"));
+
+        if (dateMonth != selectedDateMonth) {
+            this._changeMonth(dateMonth < selectedDateMonth ? -1 : 1, date)
+        } else {
+            this.setState({
+                selectedDate: date
+            });
+        }
 
     }
 
@@ -67,13 +96,14 @@ class Home extends React.Component {
 
         let firstMonday = this.getFirstMonday(this.state.date),
             date = firstMonday,
-            weeks = [];
+            weeks = [],
+            today = moment();
 
         for (let week = 0; week < this.getWeeksNums(this.state.date); week++) {
             var dates = [];
             for (let day = 0; day < 7; day++) {
                 dates.push(
-                    <TouchableOpacity onPress={this._changeSelectedDay.bind(this, date)}>
+                    <TouchableOpacity key={day + week * 7} onPress={this._changeSelectedDay.bind(this, date)}>
                         <Text style={[
                             DefaultStyle.default_text,
                             styles.days_text,
@@ -101,8 +131,8 @@ class Home extends React.Component {
         return (
             <View style={styles.main_container}>
                 <View style={[DefaultStyle.default_container, styles.date_container]}>
-                    <Text style={[DefaultStyle.default_text, styles.date_text]}>{this.state.selectedDate.format('DD')}</Text>
                     <Text style={[DefaultStyle.default_text, styles.day_text]}>{this.state.selectedDate.format('dddd')}</Text>
+                    <Text style={[DefaultStyle.default_text, styles.date_text]}>{this.state.selectedDate.format('DD')}</Text>
                 </View>
 
                 <View style={[DefaultStyle.default_container, styles.month_container]}>
@@ -133,9 +163,7 @@ class Home extends React.Component {
                     <Text style={[DefaultStyle.default_text, styles.events_title_text]}>Événements</Text>
                     <ScrollView>
                         <View style={styles.events_list}>
-                            <View style={styles.event_box}>
-                                <Text>Aurélie</Text>
-                            </View>
+                            <Event />
                         </View>
                     </ScrollView>
                 </View>
@@ -154,12 +182,13 @@ const styles = StyleSheet.create({
     main_container: {
         flex: 1,
         flexDirection: 'column',
+        backgroundColor: Palette.backgroundPrimary
     },
 
 
     date_container: {
-        flex: 1,
-        backgroundColor: '#00BCD4',
+        height: 120,
+        backgroundColor: Palette.primary,
         shadowOffset: {
             width: 0,
             height: 4
@@ -169,16 +198,19 @@ const styles = StyleSheet.create({
     },
     date_text: {
         fontSize: 80,
+        color: Palette.textSecondary,
+        marginTop: -18,
     },
     day_text: {
         fontSize: 15,
         letterSpacing: 5,
-        marginTop: -15,
+        marginTop: 10,
+        color: Palette.textSecondary
     },
 
 
     month_container: {
-        backgroundColor: '#454545',
+        backgroundColor: Palette.secondary,
         elevation: 2,
         flexDirection: 'row',
         justifyContent: 'space-between'
@@ -187,11 +219,12 @@ const styles = StyleSheet.create({
         fontSize: 10,
         margin: 12,
         textShadowRadius: 0,
+        color: Palette.textSecondary
     },
 
 
     daysname_container: {
-        backgroundColor: '#BABABA',
+        backgroundColor: Palette.tertiary,
         flexDirection: "row",
         alignContent: "center",
         justifyContent: "space-around",
@@ -200,13 +233,13 @@ const styles = StyleSheet.create({
     },
     daysname_text: {
         fontSize: 10,
-        color: '#2A2A2A',
+        color: Palette.text,
         textShadowRadius: 0,
     },
 
 
     days_container: {
-        flex: 2,
+        flex: 1.5,
         flexDirection: "column",
         alignContent: "center",
         justifyContent: "space-around",
@@ -218,18 +251,18 @@ const styles = StyleSheet.create({
         justifyContent: "space-around",
     },
     days_text: {
-        color: '#2A2A2A',
+        color: Palette.text,
         fontSize: 15,
         letterSpacing: 5,
         textShadowRadius: 0,
         textAlign: 'center'
     },
     othermonth_days_text: {
-        color: '#B0B0B0',
+        color: Palette.textMuted,
     },
     current_days_text: {
         // color: '#009BAF',
-        color: 'red',
+        color: Palette.primary,
     },
     event_days_list: {
         position: 'absolute',
@@ -241,14 +274,15 @@ const styles = StyleSheet.create({
     event_days_box: {
         height: 4,
         width: 4,
-        backgroundColor: 'red',
-        marginHorizontal: 1
+        borderRadius: 4,
+        backgroundColor: Palette.primary,
+        marginHorizontal: 1,
     },
 
 
     events_container: {
         flex: 1,
-        backgroundColor: '#E1E1E1',
+        backgroundColor: Palette.backgroundSeconday,
         justifyContent: "flex-start",
         alignItems: "stretch",
         padding: 10,
@@ -256,7 +290,7 @@ const styles = StyleSheet.create({
     },
     events_title_text: {
         fontSize: 14,
-        color: '#B0B0B0',
+        color: Palette.textMuted,
         textShadowRadius: 0,
         letterSpacing: 6,
         marginBottom: 10
@@ -265,23 +299,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "stretch",
         alignContent: 'stretch',
-    },
-    event_box: {
-        backgroundColor: 'white',
-        padding: 6,
-        borderLeftWidth: 8,
-        borderLeftColor: 'red',
-        borderTopLeftRadius: 8,
-        borderBottomLeftRadius: 8,
-        marginBottom: 6,
-
-        shadowColor: 'rgba(0, 0, 0, 0.15)',
-        shadowOffset: {
-            width: 2,
-            height: 2
-        },
-        shadowRadius: 1,
-        elevation: 1,
     },
 })
 
