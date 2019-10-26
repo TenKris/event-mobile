@@ -1,10 +1,10 @@
 import { StyleSheet } from 'react-native';
-import Palette from './Palette';
+import Colors from './colors';
 
-export default DefaultStyle = StyleSheet.create({
+export default StyleSheet.create({
 
     default_text: {
-        color: Palette.textPrimary,
+        color: Colors.textPrimary,
         fontFamily: 'Ubuntu-Bold',
         fontSize: 80,
         textTransform: "uppercase",
@@ -38,7 +38,7 @@ export default DefaultStyle = StyleSheet.create({
         alignItems: 'center',
         bottom: 10,
         right: 10,
-        backgroundColor: Palette.primary,
+        backgroundColor: Colors.primary,
         borderRadius: 100,
     },
     floating_button_icon: {

@@ -1,5 +1,4 @@
-
-export default Palette = {
+export const colors = {
 
     textPrimary: "#2A2A2A",
     textSecondary: "#F6F6F6",
@@ -16,3 +15,5 @@ export default Palette = {
     backgroundSeconday: "#E1E1E1",
 
 }
+
+export default colors;

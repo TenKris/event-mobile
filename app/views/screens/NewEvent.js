@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Text, TouchableOpacity } from 'react-native';
 
-import DefaultStyle from './Style/Style'
-
 import moment from 'moment';
 import localization from 'moment/locale/fr';
-import Palette from './Style/Palette';
+
+import DefaultStyle from '../config/style'
+import Colors from '../config/colors';
 
 
 class NewEvent extends React.Component {
@@ -52,13 +52,13 @@ const styles = StyleSheet.create({
     main_container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: Palette.backgroundPrimary
+        backgroundColor: Colors.backgroundPrimary
     },
 
 
     date_container: {
         height: 120,
-        backgroundColor: Palette.primary,
+        backgroundColor: Colors.primary,
         shadowOffset: {
             width: 0,
             height: 4
@@ -68,19 +68,19 @@ const styles = StyleSheet.create({
     },
     date_text: {
         fontSize: 80,
-        color: Palette.textSecondary,
+        color: Colors.textSecondary,
         marginTop: -18,
     },
     day_text: {
         fontSize: 15,
         letterSpacing: 5,
         marginTop: 10,
-        color: Palette.textSecondary
+        color: Colors.textSecondary
     },
 
 
     month_container: {
-        backgroundColor: Palette.secondary,
+        backgroundColor: Colors.secondary,
         elevation: 2,
         justifyContent: 'center'
     },
@@ -88,12 +88,12 @@ const styles = StyleSheet.create({
         fontSize: 10,
         margin: 12,
         textShadowRadius: 0,
-        color: Palette.textSecondary
+        color: Colors.textSecondary
     },
 
     inputs_container: {
         flex: 1,
-        backgroundColor: Palette.backgroundSeconday,
+        backgroundColor: Colors.backgroundSeconday,
         justifyContent: "flex-start",
         alignItems: "stretch",
         padding: 10,
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     },
     inputs_title_text: {
         fontSize: 14,
-        color: Palette.textMuted,
+        color: Colors.textMuted,
         textShadowRadius: 0,
         letterSpacing: 6,
         marginBottom: 10

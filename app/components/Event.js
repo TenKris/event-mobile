@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Text, TouchableOpacity } from 'react-native';
 
-import DefaultStyle from './Style/Style'
+import DefaultStyle from '../config/style'
 
 import moment from 'moment';
 import localization from 'moment/locale/fr';
-import Palette from './Style/Palette';
+import Palette from '../config/colors';
 
 
 class Event extends React.Component {

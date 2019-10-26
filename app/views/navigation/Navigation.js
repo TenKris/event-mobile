@@ -1,6 +1,6 @@
 import { createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
-import Home from '../Components/Home'
+import { createStackNavigator } from '../../../node_modules/react-navigation-stack';
+import Home from '../screens/Home'
 
 const MainNavigator = createStackNavigator({
     Home: {

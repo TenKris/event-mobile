@@ -1,13 +1,13 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Text, TouchableOpacity } from 'react-native';
 
-import DefaultStyle from './Style/Style'
-import Event from './Event'
-import AsyncStorage from '@react-native-community/async-storage';
 
 import moment from 'moment';
 import localization from 'moment/locale/fr';
-import Palette from './Style/Palette';
+
+import DefaultStyle from '../../config/style'
+import Event from '../../components/Event'
+import Colors from '../../config/colors';
 
 
 class Home extends React.Component {
@@ -19,25 +19,6 @@ class Home extends React.Component {
         this.state = {
             date: moment().startOf('month'),
             selectedDate: moment()
-        }
-
-        // Store data
-        let format = 'YYYY-MM-DD hh:mm:ss'
-        let event = {
-            name: "Travail chez le saint",
-            description: null,
-            start: moment('2019-10-28 08:30:00', format).format(),
-            end: moment('2019-10-28 18:00:00', format).format(),
-        }
-        let events = []
-        events.push(event)
-
-        storeData = async () => {
-            try {
-                await AsyncStorage.setItem('2019-10-28', JSON.stringify(events))
-            } catch (e) {
-                // saving error
-            }
         }
     }
 
@@ -103,7 +84,7 @@ class Home extends React.Component {
             var dates = [];
             for (let day = 0; day < 7; day++) {
                 dates.push(
-                    <TouchableOpacity key={day + week * 7} onPress={this._changeSelectedDay.bind(this, date)}>
+                    <TouchableOpacity onPress={this._changeSelectedDay.bind(this, date)}>
                         <Text style={[
                             DefaultStyle.default_text,
                             styles.days_text,
@@ -111,10 +92,12 @@ class Home extends React.Component {
                             this.sameDate(date, this.state.selectedDate) ? styles.current_days_text : {}
                         ]}>{date.format('DD')}</Text>
                         <View style={styles.event_days_list}>
-                            {/* <View style={styles.event_days_box}></View> */}
+                            {/* {events.map(r => )} */}
+                            {/* <View style={[styles.event_days_box]}></View> */}
                         </View>
                     </TouchableOpacity>
                 )
+
                 date = moment(date).add(1, 'day')
             }
 
@@ -137,11 +120,11 @@ class Home extends React.Component {
 
                 <View style={[DefaultStyle.default_container, styles.month_container]}>
                     <TouchableOpacity onPress={() => this._changeMonth(-1)}>
-                        <Image source={require('../images/ic_chevron_left.png')} style={{ height: 18, width: 18, marginLeft: 5 }} />
+                        <Image source={require('../../assets/icons/ic_chevron_left.png')} style={{ height: 18, width: 18, marginLeft: 5 }} />
                     </TouchableOpacity>
                     <Text style={[DefaultStyle.default_text, styles.month_text]}>{this.state.date.format('MMMM YYYY')}</Text>
                     <TouchableOpacity onPress={() => this._changeMonth(1)}>
-                        <Image source={require('../images/ic_chevron_right.png')} style={{ height: 18, width: 18, marginRight: 5 }} />
+                        <Image source={require('../../assets/icons/ic_chevron_right.png')} style={{ height: 18, width: 18, marginRight: 5 }} />
                     </TouchableOpacity>
                 </View>
 
@@ -170,7 +153,7 @@ class Home extends React.Component {
 
 
                 <TouchableOpacity style={[DefaultStyle.floating_button]} activeOpacity={.7}>
-                    <Image style={DefaultStyle.floating_button_icon} source={require('../images/ic_plus.png')} />
+                    <Image style={DefaultStyle.floating_button_icon} source={require('../../assets/icons/ic_plus.png')} />
                 </TouchableOpacity>
             </View>
         );
@@ -182,13 +165,13 @@ const styles = StyleSheet.create({
     main_container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: Palette.backgroundPrimary
+        backgroundColor: Colors.backgroundPrimary
     },
 
 
     date_container: {
         height: 120,
-        backgroundColor: Palette.primary,
+        backgroundColor: Colors.primary,
         shadowOffset: {
             width: 0,
             height: 4
@@ -198,19 +181,19 @@ const styles = StyleSheet.create({
     },
     date_text: {
         fontSize: 80,
-        color: Palette.textSecondary,
+        color: Colors.textSecondary,
         marginTop: -18,
     },
     day_text: {
         fontSize: 15,
         letterSpacing: 5,
         marginTop: 10,
-        color: Palette.textSecondary
+        color: Colors.textSecondary
     },
 
 
     month_container: {
-        backgroundColor: Palette.secondary,
+        backgroundColor: Colors.secondary,
         elevation: 2,
         flexDirection: 'row',
         justifyContent: 'space-between'
@@ -219,12 +202,12 @@ const styles = StyleSheet.create({
         fontSize: 10,
         margin: 12,
         textShadowRadius: 0,
-        color: Palette.textSecondary
+        color: Colors.textSecondary
     },
 
 
     daysname_container: {
-        backgroundColor: Palette.tertiary,
+        backgroundColor: Colors.tertiary,
         flexDirection: "row",
         alignContent: "center",
         justifyContent: "space-around",
@@ -233,7 +216,7 @@ const styles = StyleSheet.create({
     },
     daysname_text: {
         fontSize: 10,
-        color: Palette.text,
+        color: Colors.text,
         textShadowRadius: 0,
     },
 
@@ -251,18 +234,18 @@ const styles = StyleSheet.create({
         justifyContent: "space-around",
     },
     days_text: {
-        color: Palette.text,
+        color: Colors.text,
         fontSize: 15,
         letterSpacing: 5,
         textShadowRadius: 0,
         textAlign: 'center'
     },
     othermonth_days_text: {
-        color: Palette.textMuted,
+        color: Colors.textMuted,
     },
     current_days_text: {
         // color: '#009BAF',
-        color: Palette.primary,
+        color: Colors.primary,
     },
     event_days_list: {
         position: 'absolute',
@@ -275,14 +258,14 @@ const styles = StyleSheet.create({
         height: 4,
         width: 4,
         borderRadius: 4,
-        backgroundColor: Palette.primary,
+        backgroundColor: Colors.primary,
         marginHorizontal: 1,
     },
 
 
     events_container: {
         flex: 1,
-        backgroundColor: Palette.backgroundSeconday,
+        backgroundColor: Colors.backgroundSeconday,
         justifyContent: "flex-start",
         alignItems: "stretch",
         padding: 10,
@@ -290,7 +273,7 @@ const styles = StyleSheet.create({
     },
     events_title_text: {
         fontSize: 14,
-        color: Palette.textMuted,
+        color: Colors.textMuted,
         textShadowRadius: 0,
         letterSpacing: 6,
         marginBottom: 10
