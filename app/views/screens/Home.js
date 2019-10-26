@@ -9,12 +9,15 @@ import DefaultStyle from '../../config/style'
 import Event from '../../components/Event'
 import Colors from '../../config/colors';
 
+import { database } from '../../services/database/database';
+
 
 class Home extends React.Component {
 
     constructor(props) {
         super(props)
 
+        database.open()
         moment.updateLocale('fr', localization)
         this.state = {
             date: moment().startOf('month'),
