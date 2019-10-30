@@ -43,10 +43,10 @@ export class DatabaseInitialization {
         // List table
         transaction.executeSql("CREATE TABLE IF NOT EXISTS Event( " +
             "event_id INTEGER PRIMARY KEY NOT NULL, " +
-            "name TEXT NOT NULL" +
-            "description TEXT DEFAULT NULL" +
-            "start INTEGER NOT NULL" +
-            "end INTEGER DEFAULT NULL" +
+            "name TEXT NOT NULL, " +
+            "description TEXT DEFAULT NULL, " +
+            "start INTEGER NOT NULL, " +
+            "end INTEGER DEFAULT NULL, " +
             "color TEXT DEFAULT NULL" +
             ");");
         // Version table

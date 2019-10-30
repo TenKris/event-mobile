@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Text, TouchableOpacity } from 'react-native';
 
-import DefaultStyle from '../config/style'
-
 import moment from 'moment';
 import localization from 'moment/locale/fr';
-import Palette from '../config/colors';
+
+import DefaultStyle from '../config/style'
+import Colors from '../config/colors';
 
 
 class Event extends React.Component {
@@ -14,15 +14,21 @@ class Event extends React.Component {
         super(props)
 
         moment.updateLocale('fr', localization)
+        this.state = {
+            data: this.props.data
+        }
     }
 
     render() {
+
+        const data = this.state.data;
+
         return (
-            <View style={styles.event}>
-                <Text numberOfLines={1} style={styles.event_text}>Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie Aurélie</Text>
+            <View style={[styles.event, {borderColor: data.color || Colors.primary }]}>
+                <Text numberOfLines={1} style={styles.event_text}>{data.name}</Text>
                 <View style={styles.event_hours}>
-                    <Text style={styles.event_hour}>14:30</Text>
-                    <Text style={styles.event_hour}>16:30</Text>
+                    <Text style={styles.event_hour}>{moment.unix(data.start).format("HH:mm")}</Text>
+                    {data.end != null ? <Text style={styles.event_hour}>{moment.unix(data.end).format("HH:mm")}</Text> : null}
                 </View>
             </View>
         );
@@ -33,11 +39,11 @@ const styles = StyleSheet.create({
 
     event: {
         height: 32,
-        backgroundColor: Palette.backgroundPrimary,
+        backgroundColor: Colors.backgroundPrimary,
         paddingVertical: 6,
         paddingHorizontal: 10,
         borderLeftWidth: 8,
-        borderLeftColor: Palette.primary,
+        borderLeftColor: Colors.primary,
         borderTopLeftRadius: 8,
         borderBottomLeftRadius: 8,
         marginBottom: 6,
@@ -56,7 +62,7 @@ const styles = StyleSheet.create({
         alignContent: 'center',
     },
     event_text: {
-        color: Palette.text,
+        color: Colors.text,
         fontSize: 14,
         fontFamily: 'Ubuntu-Medium',
         flex: 1
@@ -69,7 +75,7 @@ const styles = StyleSheet.create({
         alignContent: 'center',
     },
     event_hour: {
-        color: Palette.textMuted,
+        color: Colors.textMuted,
         fontSize: 10,
         fontFamily: 'Ubuntu-Bold'
     }

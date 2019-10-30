@@ -1,6 +1,6 @@
 import React from 'react'
 import { View } from 'react-native';
-import Navigation from './views/navigation/Navigation'
+import Navigation from './components/navigation/Navigation'
 
 
 export default class App extends React.Component {

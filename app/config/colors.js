@@ -4,8 +4,8 @@ export const colors = {
     textSecondary: "#F6F6F6",
     textMuted: "#B0B0B0",
 
-    primary: "#FF0000",
-    primaryDak: "#DC0000",
+    primary: "#f35938",
+    primaryDark: "#cc3c1d",
 
     secondary: "#454545",
 

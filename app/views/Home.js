@@ -5,11 +5,12 @@ import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Text,
 import moment from 'moment';
 import localization from 'moment/locale/fr';
 
-import DefaultStyle from '../../config/style'
-import Event from '../../components/Event'
-import Colors from '../../config/colors';
+import DefaultStyle from '../config/style'
+import Event from '../components/Event'
+import Colors from '../config/colors';
 
-import { database } from '../../services/database/database';
+import { database } from '../services/database/database';
+import { service } from '../services/EventService';
 
 
 class Home extends React.Component {
@@ -17,14 +18,45 @@ class Home extends React.Component {
     constructor(props) {
         super(props)
 
-        database.open()
         moment.updateLocale('fr', localization)
         this.state = {
             date: moment().startOf('month'),
-            selectedDate: moment()
+            selectedDate: moment(),
+            events: {}
         }
+
+        // database.getDatabase()
+        //     .then(db => db.executeSql("INSERT INTO Event (name, start, color) VALUES (?, ?, ?);", ["Réveil", moment("2019-10-28 07:30:00").unix(), "#28A0D3"]))
+        //     .then(([results]) => {
+        //         const { insertId } = results;
+        //         console.log(`[db] InsertId: ${insertId}`);
+        //     });
     }
 
+    async componentDidMount() {
+        await this.updateEvents()
+    }
+
+    updateEvents = async () => {
+        this.setState({
+            events: await this.getEvents(this.state.selectedDate)
+        })
+    }
+
+
+    async getEvents(date){
+        let events = {},
+            data = await service.getByDate(date.clone().startOf("month").startOf("week").startOf("day").unix(), date.clone().endOf("month").endOf("week").endOf("day").unix());
+        data.forEach(element => {
+            let date = moment.unix(element.start).format("YYYY-MM-DD");
+            if (!(date in events)) {
+                events[date] = [];
+            }
+            events[date].push(element);
+        });
+
+        return events
+    }
 
     getFirstMonday(date) {
         var firstDay = moment(date).startOf('month');
@@ -53,16 +85,18 @@ class Home extends React.Component {
 
 
 
-    _changeMonth(dir, date) {
+    async _changeMonth(dir, date) {
         var newDate = this.state.date.clone();
         newDate.add(dir, 'month')
         this.setState({
             date: newDate,
-            selectedDate: date != null ? date : newDate
+            selectedDate: date != null ? date : newDate,            
+            events: await this.getEvents(date != null ? date : newDate)
         });
     }
 
     _changeSelectedDay(date) {
+
         var dateMonth = parseInt(date.format("MM")),
             selectedDateMonth = parseInt(this.state.selectedDate.format("MM"));
 
@@ -86,8 +120,15 @@ class Home extends React.Component {
         for (let week = 0; week < this.getWeeksNums(this.state.date); week++) {
             var dates = [];
             for (let day = 0; day < 7; day++) {
+
+                var events = [];
+                var formated = date.format("YYYY-MM-DD");
+                if (formated in this.state.events) {
+                    events = this.state.events[formated].map(event => <View style={[styles.event_days_box, { backgroundColor: event.color || Colors.primary }]}></View>)
+                }
+
                 dates.push(
-                    <TouchableOpacity onPress={this._changeSelectedDay.bind(this, date)}>
+                    <TouchableOpacity onPressIn={this._changeSelectedDay.bind(this, date)}>
                         <Text style={[
                             DefaultStyle.default_text,
                             styles.days_text,
@@ -95,8 +136,7 @@ class Home extends React.Component {
                             this.sameDate(date, this.state.selectedDate) ? styles.current_days_text : {}
                         ]}>{date.format('DD')}</Text>
                         <View style={styles.event_days_list}>
-                            {/* {events.map(r => )} */}
-                            {/* <View style={[styles.event_days_box]}></View> */}
+                            {events}
                         </View>
                     </TouchableOpacity>
                 )
@@ -113,6 +153,15 @@ class Home extends React.Component {
         return weeks
     }
 
+    _displayEvent() {
+        var formated = this.state.selectedDate.format("YYYY-MM-DD");
+        if (formated in this.state.events) {
+            return this.state.events[formated].map(event => <Event data={event} />)
+        } else {
+            return <Text style={styles.textMuted}>Aucun événement</Text>
+        }
+    }
+
     render() {
         return (
             <View style={styles.main_container}>
@@ -122,12 +171,12 @@ class Home extends React.Component {
                 </View>
 
                 <View style={[DefaultStyle.default_container, styles.month_container]}>
-                    <TouchableOpacity onPress={() => this._changeMonth(-1)}>
-                        <Image source={require('../../assets/icons/ic_chevron_left.png')} style={{ height: 18, width: 18, marginLeft: 5 }} />
+                    <TouchableOpacity onPress={async () => this._changeMonth(-1)}>
+                        <Image source={require('../assets/icons/ic_chevron_left.png')} style={{ height: 18, width: 18, marginLeft: 5 }} />
                     </TouchableOpacity>
                     <Text style={[DefaultStyle.default_text, styles.month_text]}>{this.state.date.format('MMMM YYYY')}</Text>
-                    <TouchableOpacity onPress={() => this._changeMonth(1)}>
-                        <Image source={require('../../assets/icons/ic_chevron_right.png')} style={{ height: 18, width: 18, marginRight: 5 }} />
+                    <TouchableOpacity onPress={async () => this._changeMonth(1)}>
+                        <Image source={require('../assets/icons/ic_chevron_right.png')} style={{ height: 18, width: 18, marginRight: 5 }} />
                     </TouchableOpacity>
                 </View>
 
@@ -149,14 +198,14 @@ class Home extends React.Component {
                     <Text style={[DefaultStyle.default_text, styles.events_title_text]}>Événements</Text>
                     <ScrollView>
                         <View style={styles.events_list}>
-                            <Event />
+                            {this._displayEvent()}
                         </View>
                     </ScrollView>
                 </View>
 
 
-                <TouchableOpacity style={[DefaultStyle.floating_button]} activeOpacity={.7}>
-                    <Image style={DefaultStyle.floating_button_icon} source={require('../../assets/icons/ic_plus.png')} />
+                <TouchableOpacity style={[DefaultStyle.floating_button]} onPress={() => this.props.navigation.navigate('NewEvent', { date: this.state.selectedDate, update: this.updateEvents })} activeOpacity={.7}>
+                    <Image style={DefaultStyle.floating_button_icon} source={require('../assets/icons/ic_plus.png')} />
                 </TouchableOpacity>
             </View>
         );
