@@ -14,16 +14,14 @@ class HeaderDate extends React.Component {
         super(props)
 
         moment.updateLocale('fr', localization)
-        this.state = {
-            date: this.props.date || moment(),
-        }
     }
 
     render() {
+        const date = this.props.date || moment();
         return (
-            <View style={[DefaultStyle.default_container, styles.date_container]}>
-                <Text style={[DefaultStyle.default_text, styles.day_text]}>{this.state.date.format('dddd')}</Text>
-                <Text style={[DefaultStyle.default_text, styles.date_text]}>{this.state.date.format('DD')}</Text>
+            <View style={[DefaultStyle.default_container, styles.date_container, { backgroundColor: this.props.background || Colors.primary }]}>
+                <Text style={[DefaultStyle.default_text, styles.day_text]}>{date.format('dddd')}</Text>
+                <Text style={[DefaultStyle.default_text, styles.date_text]}>{date.format('DD')}</Text>
             </View>
         );
     }

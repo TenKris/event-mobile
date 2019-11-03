@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableHighlight } from 'react-native';
 
 import DefaultStyle from '../config/style'
-import Colors, { colors } from '../config/colors';
+import Colors from '../config/colors';
 
 
 class Btn extends React.Component {

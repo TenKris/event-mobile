@@ -1,13 +1,15 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Text, TouchableOpacity } from 'react-native';
-
+import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Animated, Text, TouchableOpacity } from 'react-native';
 
 import moment from 'moment';
 import localization from 'moment/locale/fr';
 
 import DefaultStyle from '../config/style'
-import Event from '../components/Event'
 import Colors from '../config/colors';
+
+import Event from '../components/Event'
+import Toast from '../components/Toast';
+import FloatingButton from '../components/FloatingButton';
 
 import { database } from '../services/database/database';
 import { service } from '../services/EventService';
@@ -24,13 +26,6 @@ class Home extends React.Component {
             selectedDate: moment(),
             events: {}
         }
-
-        // database.getDatabase()
-        //     .then(db => db.executeSql("INSERT INTO Event (name, start, color) VALUES (?, ?, ?);", ["Réveil", moment("2019-10-28 07:30:00").unix(), "#28A0D3"]))
-        //     .then(([results]) => {
-        //         const { insertId } = results;
-        //         console.log(`[db] InsertId: ${insertId}`);
-        //     });
     }
 
     async componentDidMount() {
@@ -44,7 +39,7 @@ class Home extends React.Component {
     }
 
 
-    async getEvents(date){
+    async getEvents(date) {
         let events = {},
             data = await service.getByDate(date.clone().startOf("month").startOf("week").startOf("day").unix(), date.clone().endOf("month").endOf("week").endOf("day").unix());
         data.forEach(element => {
@@ -90,13 +85,12 @@ class Home extends React.Component {
         newDate.add(dir, 'month')
         this.setState({
             date: newDate,
-            selectedDate: date != null ? date : newDate,            
+            selectedDate: date != null ? date : newDate,
             events: await this.getEvents(date != null ? date : newDate)
         });
     }
 
     _changeSelectedDay(date) {
-
         var dateMonth = parseInt(date.format("MM")),
             selectedDateMonth = parseInt(this.state.selectedDate.format("MM"));
 
@@ -107,7 +101,6 @@ class Home extends React.Component {
                 selectedDate: date
             });
         }
-
     }
 
     _displayDates() {
@@ -124,7 +117,7 @@ class Home extends React.Component {
                 var events = [];
                 var formated = date.format("YYYY-MM-DD");
                 if (formated in this.state.events) {
-                    events = this.state.events[formated].map(event => <View style={[styles.event_days_box, { backgroundColor: event.color || Colors.primary }]}></View>)
+                    events = this.state.events[formated].slice(0, 5).map(event => <View style={[styles.event_days_box, { backgroundColor: event.color || Colors.primary }]}></View>)
                 }
 
                 dates.push(
@@ -203,10 +196,9 @@ class Home extends React.Component {
                     </ScrollView>
                 </View>
 
+                <FloatingButton onPress={() => this.props.navigation.navigate('NewEvent', { date: this.state.selectedDate, update: this.updateEvents, notify: () => this.refs.defaultToast.show('Le nouvel événement a été ajouté !') })} image={require('../assets/icons/ic_plus.png')} />
 
-                <TouchableOpacity style={[DefaultStyle.floating_button]} onPress={() => this.props.navigation.navigate('NewEvent', { date: this.state.selectedDate, update: this.updateEvents })} activeOpacity={.7}>
-                    <Image style={DefaultStyle.floating_button_icon} source={require('../assets/icons/ic_plus.png')} />
-                </TouchableOpacity>
+                <Toast ref="defaultToast" />
             </View>
         );
     }
@@ -217,7 +209,7 @@ const styles = StyleSheet.create({
     main_container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: Colors.backgroundPrimary
+        backgroundColor: Colors.backgroundPrimary,
     },
 
 

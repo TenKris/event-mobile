@@ -5,13 +5,14 @@ import moment from 'moment';
 import localization from 'moment/locale/fr';
 
 import DefaultStyle from '../config/style'
-import Colors, { colors } from '../config/colors';
+import Colors from '../config/colors';
 import { service } from '../services/EventService';
 
 import HeaderDate from '../components/HeaderDate';
 import Btn from '../components/Btn';
 
 import DatePicker from 'react-native-datepicker'
+import PushNotification from 'react-native-push-notification'
 
 
 class NewEvent extends React.Component {
@@ -25,19 +26,20 @@ class NewEvent extends React.Component {
         this.colors = [
             Colors.primary,
             "#F77900",
-            "#FCEE6D",
+            // "#FCEE6D",
             "#55BE30",
             "#28A0D3",
             "#8333E3",
-            "#FB5993"
+            // "#FB5993"
         ]
+
+        let date = this.props.navigation.getParam('date', moment());
         this.state = {
-            date: this.props.navigation.getParam('date', moment()),
             event: {
                 name: null,
                 description: null,
-                start: moment(),
-                end: moment().add(1, 'hours'),
+                start: date,
+                end: null,
                 color: this.colors[0]
             },
         }
@@ -55,7 +57,16 @@ class NewEvent extends React.Component {
 
     async submit() {
         await service.create(this.state.event);
+        PushNotification.localNotificationSchedule({
+            title: this.state.event.description != null ? this.state.event.title : null,
+            message: this.state.event.description != null ? this.state.event.description : this.state.event.title,
+            soundName: 'default',
+
+            date: this.state.event.start.toDate()
+        });
+
         await this.props.navigation.state.params.update();
+        this.props.navigation.state.params.notify();
         this.props.navigation.goBack();
     }
 
@@ -70,10 +81,10 @@ class NewEvent extends React.Component {
     render() {
         return (
             <View style={styles.main_container}>
-                <HeaderDate date={this.state.date} />
+                <HeaderDate date={this.state.event.start} background={this.state.event.color} />
 
                 <View style={[DefaultStyle.default_container, styles.month_container]}>
-                    <Text style={[DefaultStyle.default_text, styles.month_text]}>{this.state.date.format('MMMM YYYY')}</Text>
+                    <Text style={[DefaultStyle.default_text, styles.month_text]}>{this.state.event.start.format('MMMM YYYY')}</Text>
                 </View>
 
                 <View style={[DefaultStyle.default_container, styles.inputs_container]}>
@@ -114,7 +125,7 @@ class NewEvent extends React.Component {
                                         onDateChange={(date) => {
                                             this.changeEvent("start", moment(date, this.defaultFormat))
                                             if (this.state.event.start.diff(this.state.event.end) > 0)
-                                                this.changeEvent("end", moment(this.state.event.start.clone().add(1, 'hours'), this.defaultFormat))
+                                                this.changeEvent("start", moment(this.state.event.start.clone().add(1, 'hours'), this.defaultFormat))
                                         }}
                                     />
                                     <Text style={styles.invalid_message}></Text>

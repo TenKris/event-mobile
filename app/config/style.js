@@ -43,7 +43,7 @@ export default StyleSheet.create({
     },
     floating_button_icon: {
         // color: '#01a699',
-        height: 20,
-        width: 20,
+        height: 16,
+        width: 16,
     }
 });
