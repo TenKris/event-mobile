@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Animated, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Animated, Image, Text, TouchableOpacity } from 'react-native';
 
 import moment from 'moment';
 import localization from 'moment/locale/fr';
@@ -25,7 +25,8 @@ class Home extends React.Component {
         this.state = {
             date: moment().startOf('month'),
             selectedDate: moment(),
-            events: {}
+            events: {},
+            flex: 1
         }
     }
 
@@ -167,7 +168,12 @@ class Home extends React.Component {
     _displayEvent() {
         var formated = this.state.selectedDate.format("YYYY-MM-DD");
         if (formated in this.state.events) {
-            return this.state.events[formated].map(event => <Event data={event} />)
+            return <FlatList
+                data={this.state.events[formated]}
+                renderItem={({ item }) => <Event key={item.id} data={item} />}
+                style={styles.events_list}
+                keyExtractor={item => item.id}
+            />
         } else {
             return <Text style={styles.textMuted}>Aucun événement</Text>
         }
@@ -198,11 +204,7 @@ class Home extends React.Component {
 
                 <View style={[DefaultStyle.default_container, styles.events_container]}>
                     <Text style={[DefaultStyle.default_text, styles.events_title_text]}>Événements</Text>
-                    <ScrollView>
-                        <View style={styles.events_list}>
-                            {this._displayEvent()}
-                        </View>
-                    </ScrollView>
+                    {this._displayEvent()}
                 </View>
 
                 <FloatingButton onPress={() => this.props.navigation.navigate('NewEvent', { date: this.state.selectedDate, update: this.updateEvents, notify: () => this.refs.defaultToast.show('Un nouvel événement a été ajouté !') })} image={require('../assets/icons/ic_plus.png')} />
@@ -338,9 +340,9 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     events_list: {
-        justifyContent: "center",
-        alignItems: "stretch",
-        alignContent: 'stretch',
+        // justifyContent: "center",
+        // alignItems: "stretch",
+        // alignContent: 'stretch',
     },
 })
 
