@@ -111,6 +111,16 @@ class Home extends React.Component {
         }
     }
 
+    _displayDaysName() {
+        let daysname = [],
+            date = moment().startOf('week');
+        for (let i = 0; i < 7; i++) {
+            daysname.push(<Text style={[DefaultStyle.default_text, styles.daysname_text]}>{date.format('dddd').substring(0,3)}</Text>)
+            date.add(1, 'days')
+        }
+        return daysname;
+    }
+
     _displayDates() {
 
         let firstMonday = this.getFirstMonday(this.state.date),
@@ -129,12 +139,12 @@ class Home extends React.Component {
                 }
 
                 dates.push(
-                    <TouchableOpacity onPressIn={this._changeSelectedDay.bind(this, date)}>
+                    <TouchableOpacity style={styles.day_holder} onPressIn={this._changeSelectedDay.bind(this, date)}>
                         <Text style={[
                             DefaultStyle.default_text,
-                            styles.days_text,
-                            this.withinMonth(date, this.state.date) ? {} : styles.othermonth_days_text,
-                            this.sameDate(date, this.state.selectedDate) ? styles.current_days_text : {}
+                            styles.day_text,
+                            this.withinMonth(date, this.state.date) ? {} : styles.othermonth_day_text,
+                            this.sameDate(date, this.state.selectedDate) ? styles.current_day_text : {}
                         ]}>{date.format('DD')}</Text>
                         <View style={styles.event_days_list}>
                             {events}
@@ -179,13 +189,7 @@ class Home extends React.Component {
                 </View>
 
                 <View style={[DefaultStyle.default_container, styles.daysname_container]}>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Lun</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Mar</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Mer</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Jeu</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Ven</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Sam</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Dim</Text>
+                    {this._displayDaysName()}
                 </View>
 
                 <View style={[DefaultStyle.default_container, styles.days_container]}>
@@ -201,7 +205,7 @@ class Home extends React.Component {
                     </ScrollView>
                 </View>
 
-                <FloatingButton onPress={() => this.props.navigation.navigate('NewEvent', { date: this.state.selectedDate, update: this.updateEvents, notify: () => this.refs.defaultToast.show('Le nouvel événement a été ajouté !') })} image={require('../assets/icons/ic_plus.png')} />
+                <FloatingButton onPress={() => this.props.navigation.navigate('NewEvent', { date: this.state.selectedDate, update: this.updateEvents, notify: () => this.refs.defaultToast.show('Un nouvel événement a été ajouté !') })} image={require('../assets/icons/ic_plus.png')} />
 
                 <Toast ref="defaultToast" />
             </View>
@@ -282,23 +286,29 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around",
     },
-    days_text: {
+    day_holder: {
+        flex: 1,
+        alignSelf: 'stretch',
+        justifyContent: 'center',
+    },
+    day_text: {
         color: Colors.text,
         fontSize: 15,
         letterSpacing: 5,
         textShadowRadius: 0,
         textAlign: 'center'
     },
-    othermonth_days_text: {
+    othermonth_day_text: {
         color: Colors.textMuted,
     },
-    current_days_text: {
+    current_day_text: {
         // color: '#009BAF',
         color: Colors.primary,
     },
     event_days_list: {
         position: 'absolute',
-        left: 0, right: 0, bottom: -5,
+        left: 0, right: 0,
+        paddingTop: 24,
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'row'
