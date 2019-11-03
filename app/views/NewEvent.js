@@ -81,7 +81,7 @@ class NewEvent extends React.Component {
     render() {
         return (
             <View style={styles.main_container}>
-                <HeaderDate date={this.state.event.start} background={this.state.event.color} />
+                <HeaderDate date={this.state.event.start} navigation={this.props.navigation} background={this.state.event.color} />
 
                 <View style={[DefaultStyle.default_container, styles.month_container]}>
                     <Text style={[DefaultStyle.default_text, styles.month_text]}>{this.state.event.start.format('MMMM YYYY')}</Text>

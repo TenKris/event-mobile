@@ -10,6 +10,7 @@ import Colors from '../config/colors';
 import Event from '../components/Event'
 import Toast from '../components/Toast';
 import FloatingButton from '../components/FloatingButton';
+import HeaderDate from '../components/HeaderDate';
 
 import { database } from '../services/database/database';
 import { service } from '../services/EventService';
@@ -77,6 +78,13 @@ class Home extends React.Component {
         return date1.format('YYYY-MM-DD') == date2.format('YYYY-MM-DD')
     }
 
+    getFirstEventColor() {
+        var formated = this.state.selectedDate.format("YYYY-MM-DD");
+        if (formated in this.state.events) {
+            return this.state.events[formated][0].color
+        }
+        return null;
+    }
 
 
 
@@ -158,10 +166,7 @@ class Home extends React.Component {
     render() {
         return (
             <View style={styles.main_container}>
-                <View style={[DefaultStyle.default_container, styles.date_container]}>
-                    <Text style={[DefaultStyle.default_text, styles.day_text]}>{this.state.selectedDate.format('dddd')}</Text>
-                    <Text style={[DefaultStyle.default_text, styles.date_text]}>{this.state.selectedDate.format('DD')}</Text>
-                </View>
+                <HeaderDate date={this.state.selectedDate} navigation={this.props.navigation} background={this.getFirstEventColor()} />
 
                 <View style={[DefaultStyle.default_container, styles.month_container]}>
                     <TouchableOpacity onPress={async () => this._changeMonth(-1)}>
