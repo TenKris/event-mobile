@@ -1,13 +1,16 @@
 import React from 'react';
-import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Text, TouchableOpacity } from 'react-native';
-
+import { StyleSheet, View, ScrollView, Button, TextInput, FlatList, Image, Animated, Text, TouchableOpacity } from 'react-native';
 
 import moment from 'moment';
 import localization from 'moment/locale/fr';
 
 import DefaultStyle from '../config/style'
-import Event from '../components/Event'
 import Colors from '../config/colors';
+
+import Event from '../components/Event'
+import Toast from '../components/Toast';
+import FloatingButton from '../components/FloatingButton';
+import HeaderDate from '../components/HeaderDate';
 
 import { database } from '../services/database/database';
 import { service } from '../services/EventService';
@@ -24,13 +27,6 @@ class Home extends React.Component {
             selectedDate: moment(),
             events: {}
         }
-
-        // database.getDatabase()
-        //     .then(db => db.executeSql("INSERT INTO Event (name, start, color) VALUES (?, ?, ?);", ["Réveil", moment("2019-10-28 07:30:00").unix(), "#28A0D3"]))
-        //     .then(([results]) => {
-        //         const { insertId } = results;
-        //         console.log(`[db] InsertId: ${insertId}`);
-        //     });
     }
 
     async componentDidMount() {
@@ -44,7 +40,7 @@ class Home extends React.Component {
     }
 
 
-    async getEvents(date){
+    async getEvents(date) {
         let events = {},
             data = await service.getByDate(date.clone().startOf("month").startOf("week").startOf("day").unix(), date.clone().endOf("month").endOf("week").endOf("day").unix());
         data.forEach(element => {
@@ -82,6 +78,13 @@ class Home extends React.Component {
         return date1.format('YYYY-MM-DD') == date2.format('YYYY-MM-DD')
     }
 
+    getFirstEventColor() {
+        var formated = this.state.selectedDate.format("YYYY-MM-DD");
+        if (formated in this.state.events) {
+            return this.state.events[formated][0].color
+        }
+        return null;
+    }
 
 
 
@@ -90,13 +93,12 @@ class Home extends React.Component {
         newDate.add(dir, 'month')
         this.setState({
             date: newDate,
-            selectedDate: date != null ? date : newDate,            
+            selectedDate: date != null ? date : newDate,
             events: await this.getEvents(date != null ? date : newDate)
         });
     }
 
     _changeSelectedDay(date) {
-
         var dateMonth = parseInt(date.format("MM")),
             selectedDateMonth = parseInt(this.state.selectedDate.format("MM"));
 
@@ -107,7 +109,16 @@ class Home extends React.Component {
                 selectedDate: date
             });
         }
+    }
 
+    _displayDaysName() {
+        let daysname = [],
+            date = moment().startOf('week');
+        for (let i = 0; i < 7; i++) {
+            daysname.push(<Text style={[DefaultStyle.default_text, styles.daysname_text]}>{date.format('dddd').substring(0,3)}</Text>)
+            date.add(1, 'days')
+        }
+        return daysname;
     }
 
     _displayDates() {
@@ -124,16 +135,16 @@ class Home extends React.Component {
                 var events = [];
                 var formated = date.format("YYYY-MM-DD");
                 if (formated in this.state.events) {
-                    events = this.state.events[formated].map(event => <View style={[styles.event_days_box, { backgroundColor: event.color || Colors.primary }]}></View>)
+                    events = this.state.events[formated].slice(0, 5).map(event => <View style={[styles.event_days_box, { backgroundColor: event.color || Colors.primary }]}></View>)
                 }
 
                 dates.push(
-                    <TouchableOpacity onPressIn={this._changeSelectedDay.bind(this, date)}>
+                    <TouchableOpacity style={styles.day_holder} onPressIn={this._changeSelectedDay.bind(this, date)}>
                         <Text style={[
                             DefaultStyle.default_text,
-                            styles.days_text,
-                            this.withinMonth(date, this.state.date) ? {} : styles.othermonth_days_text,
-                            this.sameDate(date, this.state.selectedDate) ? styles.current_days_text : {}
+                            styles.day_text,
+                            this.withinMonth(date, this.state.date) ? {} : styles.othermonth_day_text,
+                            this.sameDate(date, this.state.selectedDate) ? styles.current_day_text : {}
                         ]}>{date.format('DD')}</Text>
                         <View style={styles.event_days_list}>
                             {events}
@@ -165,10 +176,7 @@ class Home extends React.Component {
     render() {
         return (
             <View style={styles.main_container}>
-                <View style={[DefaultStyle.default_container, styles.date_container]}>
-                    <Text style={[DefaultStyle.default_text, styles.day_text]}>{this.state.selectedDate.format('dddd')}</Text>
-                    <Text style={[DefaultStyle.default_text, styles.date_text]}>{this.state.selectedDate.format('DD')}</Text>
-                </View>
+                <HeaderDate date={this.state.selectedDate} navigation={this.props.navigation} background={this.getFirstEventColor()} />
 
                 <View style={[DefaultStyle.default_container, styles.month_container]}>
                     <TouchableOpacity onPress={async () => this._changeMonth(-1)}>
@@ -181,13 +189,7 @@ class Home extends React.Component {
                 </View>
 
                 <View style={[DefaultStyle.default_container, styles.daysname_container]}>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Lun</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Mar</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Mer</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Jeu</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Ven</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Sam</Text>
-                    <Text style={[DefaultStyle.default_text, styles.daysname_text]}>Dim</Text>
+                    {this._displayDaysName()}
                 </View>
 
                 <View style={[DefaultStyle.default_container, styles.days_container]}>
@@ -203,10 +205,9 @@ class Home extends React.Component {
                     </ScrollView>
                 </View>
 
+                <FloatingButton onPress={() => this.props.navigation.navigate('NewEvent', { date: this.state.selectedDate, update: this.updateEvents, notify: () => this.refs.defaultToast.show('Un nouvel événement a été ajouté !') })} image={require('../assets/icons/ic_plus.png')} />
 
-                <TouchableOpacity style={[DefaultStyle.floating_button]} onPress={() => this.props.navigation.navigate('NewEvent', { date: this.state.selectedDate, update: this.updateEvents })} activeOpacity={.7}>
-                    <Image style={DefaultStyle.floating_button_icon} source={require('../assets/icons/ic_plus.png')} />
-                </TouchableOpacity>
+                <Toast ref="defaultToast" />
             </View>
         );
     }
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
     main_container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: Colors.backgroundPrimary
+        backgroundColor: Colors.backgroundPrimary,
     },
 
 
@@ -285,23 +286,29 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around",
     },
-    days_text: {
+    day_holder: {
+        flex: 1,
+        alignSelf: 'stretch',
+        justifyContent: 'center',
+    },
+    day_text: {
         color: Colors.text,
         fontSize: 15,
         letterSpacing: 5,
         textShadowRadius: 0,
         textAlign: 'center'
     },
-    othermonth_days_text: {
+    othermonth_day_text: {
         color: Colors.textMuted,
     },
-    current_days_text: {
+    current_day_text: {
         // color: '#009BAF',
         color: Colors.primary,
     },
     event_days_list: {
         position: 'absolute',
-        left: 0, right: 0, bottom: -5,
+        left: 0, right: 0,
+        paddingTop: 24,
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'row'

@@ -20,9 +20,7 @@ class Event extends React.Component {
     }
 
     render() {
-
         const data = this.state.data;
-
         return (
             <View style={[styles.event, {borderColor: data.color || Colors.primary }]}>
                 <Text numberOfLines={1} style={styles.event_text}>{data.name}</Text>
