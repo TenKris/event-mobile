@@ -14,16 +14,25 @@ class HeaderDate extends React.Component {
         super(props)
 
         moment.updateLocale('fr', localization)
-        this.state = {
-            date: this.props.date || moment(),
+    }
+
+    _backButton() {
+        if (this.props.navigation != null && !this.props.navigation.isFirstRouteInParent()) {
+            return <TouchableOpacity style={styles.back_button} onPress={() => this.props.navigation.goBack()}>
+                <Image style={{ height: 22, width: 15 }} source={require('../assets/icons/ic_back.png')} />
+            </TouchableOpacity>
         }
+
+        return null
     }
 
     render() {
+        const date = this.props.date || moment();
         return (
-            <View style={[DefaultStyle.default_container, styles.date_container]}>
-                <Text style={[DefaultStyle.default_text, styles.day_text]}>{this.state.date.format('dddd')}</Text>
-                <Text style={[DefaultStyle.default_text, styles.date_text]}>{this.state.date.format('DD')}</Text>
+            <View style={[DefaultStyle.default_container, styles.date_container, { backgroundColor: this.props.background || Colors.primary }]}>
+                {this._backButton()}
+                <Text style={[DefaultStyle.default_text, styles.day_text]}>{date.format('dddd')}</Text>
+                <Text style={[DefaultStyle.default_text, styles.date_text]}>{date.format('DD')}</Text>
             </View>
         );
     }
@@ -52,6 +61,13 @@ const styles = StyleSheet.create({
         marginTop: 10,
         color: Colors.textSecondary
     },
+
+    back_button: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        padding: 8,
+    }
 })
 
 
