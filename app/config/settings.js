@@ -1,5 +1,5 @@
 export const settings = {
-	API_URL: "https://www.api.com",
-};
+	API_URL: 'https://www.api.com'
+}
 
-export default settings;
+export default settings
