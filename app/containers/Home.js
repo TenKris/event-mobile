@@ -47,11 +47,34 @@ class Home extends React.Component {
 				.add(5, 'seconds')
 				.toDate()
 		})
+
+		// Update month and selected date events
+		this.updateEvents(this.state.date)
 	}
 
 	addEvent = event => {
-		const action = { type: 'ADD_EVENT', value: event }
+		let eventParsed = {
+			...event
+		}
+		eventParsed.start = event.start.format()
+
+		const action = { type: 'ADD_EVENT', value: eventParsed }
 		this.props.dispatch(action)
+	}
+
+	updateEvents = date => {
+		// Get all events from this month
+		this.monthEvents = this.props.events.filter(event => {
+			let start = moment(event.start)
+			return (
+				start.isSameOrAfter(getFirstMondayOfWeekAndMonth(date)) &&
+				start.isSameOrBefore(getLastSundayOfWeekAndMonth(date))
+			)
+		})
+		// Get all events from selected Date
+		this.selectedDateEvents = this.monthEvents.filter(event =>
+			moment(event.start).isSame(date, 'day')
+		)
 	}
 
 	ChangeDateValue = (value, direction) => {
@@ -60,45 +83,23 @@ class Home extends React.Component {
 	}
 
 	ChangeDate = date => {
-		this.setState({
-			date
-		})
-	}
-
-	renderEvents(events) {
-		if (events.length !== 0) {
-			return events.map(event => <Event data={event} />)
-		} else {
-			return <Text style={styles.textMuted}>Aucun événement</Text>
-		}
+		this.setState(
+			{
+				date
+			},
+			this.updateEvents(date)
+		)
 	}
 
 	render() {
-		// Get all events from this month
-		const monthEvents = this.props.events.filter(event => {
-				let date = moment(event.start)
-				return (
-					date.isSameOrAfter(
-						getFirstMondayOfWeekAndMonth(this.state.date)
-					) &&
-					date.isSameOrBefore(
-						getLastSundayOfWeekAndMonth(this.state.date)
-					)
-				)
-			}),
-			// Get all events from selected Date
-			selectedDateEvents = monthEvents.filter(event =>
-				moment(event.start).isSame(this.state.date, 'day')
-			)
-
 		return (
 			<View style={styles.main_container}>
 				<HeaderDate
 					date={this.state.date}
 					navigation={this.props.navigation}
 					background={
-						selectedDateEvents.length !== 0
-							? selectedDateEvents[0].color
+						this.selectedDateEvents.length !== 0
+							? this.selectedDateEvents[0].color
 							: null
 					}
 				/>
@@ -123,14 +124,18 @@ class Home extends React.Component {
 						onPress={() => this.ChangeDateValue('month', 1)}>
 						<Image
 							source={require('../assets/icons/ic_chevron_right.png')}
-							style={{ height: 18, width: 18, marginRight: 5 }}
+							style={{
+								height: 18,
+								width: 18,
+								marginRight: 5
+							}}
 						/>
 					</TouchableOpacity>
 				</View>
 
 				<Calendar
 					selectedDate={this.state.date}
-					events={monthEvents}
+					events={this.monthEvents}
 					ChangeDate={this.ChangeDate}
 				/>
 
@@ -146,11 +151,22 @@ class Home extends React.Component {
 						]}>
 						Événements
 					</Text>
-					<ScrollView>
-						<View style={styles.events_list}>
-							{this.renderEvents(selectedDateEvents)}
-						</View>
-					</ScrollView>
+					<View style={styles.events_list}>
+						<FlatList
+							style={{ flex: 1 }}
+							data={this.selectedDateEvents}
+							extraData={this.props}
+							ListEmptyComponent={
+								<Text style={styles.textMuted}>
+									Aucun événement
+								</Text>
+							}
+							renderItem={({ item, index }) => {
+								return <Event key={index} data={item} />
+							}}
+							keyExtractor={(item, key) => key.toString()}
+						/>
+					</View>
 				</View>
 
 				<FloatingButton
@@ -160,7 +176,7 @@ class Home extends React.Component {
 							addEvent: this.addEvent,
 							notify: () =>
 								this.refs.defaultToast.show(
-									'Un nouvel événement a été ajouté !'
+									'Le nouvel événement a été ajouté !'
 								)
 						})
 					}
@@ -297,6 +313,7 @@ const styles = StyleSheet.create({
 		marginBottom: 10
 	},
 	events_list: {
+		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'stretch',
 		alignContent: 'stretch'

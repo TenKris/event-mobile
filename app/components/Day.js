@@ -6,8 +6,9 @@ import Colors from '../config/colors'
 
 class Day extends React.Component {
 	renderEvents() {
-		return this.props.events.slice(0, 5).map(event => (
+		return this.props.events.slice(0, 5).map((event, index) => (
 			<View
+				key={index}
 				style={[
 					styles.event_days_box,
 					{

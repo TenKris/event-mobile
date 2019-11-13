@@ -17,7 +17,6 @@ import moment from '../config/LocaleMoment'
 
 import DefaultStyle from '../config/style'
 import Colors from '../config/colors'
-import { service } from '../services/EventService'
 
 import HeaderDate from '../components/HeaderDate'
 import Btn from '../components/display/Btn'
@@ -46,7 +45,6 @@ class NewEvent extends React.Component {
 				name: null,
 				description: null,
 				start: date,
-				end: null,
 				color: this.colors[0]
 			}
 		}
@@ -122,6 +120,7 @@ class NewEvent extends React.Component {
 					</Text>
 					<ScrollView>
 						<View style={styles.inputs_list}>
+							{/* Le nom */}
 							<View style={styles.form_group}>
 								<Text style={styles.label}>Intitulé</Text>
 								<TextInput
@@ -136,112 +135,47 @@ class NewEvent extends React.Component {
 								<Text style={styles.invalid_message}></Text>
 							</View>
 
-							<View style={[styles.form_group, styles.form_row]}>
-								<View
+							{/* Le start */}
+							<View style={[styles.form_group]}>
+								<Text style={styles.label}>Date de début</Text>
+								<DatePicker
 									style={[
-										styles.form_group,
-										styles.form_col
-									]}>
-									<Text style={styles.label}>
-										Date de début
-									</Text>
-									<DatePicker
-										style={[
-											styles.input,
-											{
-												paddingVertical: 2,
-												paddingHorizontal: 0
-											}
-										]}
-										customStyles={{
-											dateInput: {
-												borderWidth: 0
-											},
-											dateText: {
-												color: Colors.textPrimary
-											}
-										}}
-										date={this.state.event.start}
-										mode="datetime"
-										androidMode="spinner"
-										placeholder="Choisissez une date"
-										format={this.defaultFormat}
-										// minDate="2016-05-01"
-										// maxDate="2016-06-01"
-										confirmBtnText="OK"
-										cancelBtnText="Annuler"
-										showIcon={false}
-										is24Hour={true}
-										onDateChange={date => {
-											this.changeEvent(
-												'start',
-												moment(date, this.defaultFormat)
-											)
-											if (
-												this.state.event.start.diff(
-													this.state.event.end
-												) > 0
-											)
-												this.changeEvent(
-													'start',
-													moment(
-														this.state.event.start
-															.clone()
-															.add(1, 'hours'),
-														this.defaultFormat
-													)
-												)
-										}}
-									/>
-									<Text style={styles.invalid_message}></Text>
-								</View>
-								<View
-									style={[
-										styles.form_group,
-										styles.form_col
-									]}>
-									<Text style={styles.label}>
-										Date de Fin
-									</Text>
-									<DatePicker
-										style={[
-											styles.input,
-											{
-												paddingVertical: 2,
-												paddingHorizontal: 0
-											}
-										]}
-										customStyles={{
-											dateInput: {
-												borderWidth: 0
-											},
-											dateText: {
-												color: Colors.textPrimary
-											}
-										}}
-										date={this.state.event.end}
-										mode="datetime"
-										androidMode="spinner"
-										placeholder="Choisissez une date"
-										format={this.defaultFormat}
-										minDate={this.state.event.start.format(
-											this.defaultFormat
-										)}
-										confirmBtnText="OK"
-										cancelBtnText="Annuler"
-										showIcon={false}
-										is24Hour={true}
-										onDateChange={date =>
-											this.changeEvent(
-												'end',
-												moment(date, this.defaultFormat)
-											)
+										styles.input,
+										{
+											width: '100%',
+											paddingVertical: 2,
+											paddingHorizontal: 0
 										}
-									/>
-									<Text style={styles.invalid_message}></Text>
-								</View>
+									]}
+									customStyles={{
+										dateInput: {
+											borderWidth: 0
+										},
+										dateText: {
+											color: Colors.textPrimary
+										}
+									}}
+									date={this.state.event.start}
+									mode="datetime"
+									placeholder="Choisissez une date"
+									format={this.defaultFormat}
+									// minDate="2016-05-01"
+									// maxDate="2016-06-01"
+									confirmBtnText="OK"
+									cancelBtnText="Annuler"
+									showIcon={false}
+									is24Hour={true}
+									onDateChange={date =>
+										this.changeEvent(
+											'start',
+											moment(date, this.defaultFormat)
+										)
+									}
+								/>
+								<Text style={styles.invalid_message}></Text>
 							</View>
 
+							{/* Description */}
 							<View style={styles.form_group}>
 								<Text style={styles.label}>Description</Text>
 								<TextInput

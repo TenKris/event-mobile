@@ -11,24 +11,14 @@ import {
 	TouchableOpacity
 } from 'react-native'
 
-import moment from 'moment'
-import localization from 'moment/locale/fr'
+import moment from '../config/LocaleMoment'
 
 import DefaultStyle from '../config/style'
 import Colors from '../config/colors'
 
 class Event extends React.Component {
-	constructor(props) {
-		super(props)
-
-		moment.updateLocale('fr', localization)
-		this.state = {
-			data: this.props.data
-		}
-	}
-
 	render() {
-		const data = this.state.data
+		const { data } = this.props
 		return (
 			<View
 				style={[
@@ -40,11 +30,11 @@ class Event extends React.Component {
 				</Text>
 				<View style={styles.event_hours}>
 					<Text style={styles.event_hour}>
-						{moment.unix(data.start).format('HH:mm')}
+						{moment(data.start).format('HH:mm')}
 					</Text>
 					{data.end != null ? (
 						<Text style={styles.event_hour}>
-							{moment.unix(data.end).format('HH:mm')}
+							{moment(data.end).format('HH:mm')}
 						</Text>
 					) : null}
 				</View>
